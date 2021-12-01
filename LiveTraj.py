@@ -24,9 +24,9 @@ if __name__ == '__main__':
     repeat = input("do we need to repeat? [y/n]")
     if repeat == 'y':
         setup()
-
-    arm6.set_mode(1)
-    arm6.set_state(0)
+    for a in arms:
+        a.set_mode(1)
+        a.set_state(0)
 
 
     def changeDir():
@@ -40,6 +40,7 @@ if __name__ == '__main__':
     que = queue.Queue()
     t2 = Thread(target=changeDir)
     t2.start()
+
     IP = [0, 0, 0, 90, 0, 0, 0]
     tf = 3
 
