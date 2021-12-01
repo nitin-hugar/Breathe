@@ -25,15 +25,9 @@ def cvt(path):
 
 def playDance(step):
     length = len(step)
-    # for a in range (3):
-    #     print(2-a)
-    #     time.sleep(1)
+
     for i in range(length):
         start_time = time.time()
-        # board.digital[4].mode = pyfirmata.INPUT
-        # board.digital[2].mode = pyfirmata.INPUT
-        # red = board.digital[4].read()
-
         j_angles = (step[i])
         # b=6
         # arms[b].set_servo_angle_j(angles=j_angles[(b * 7):((b + 1) * 7)], is_radian=False)
@@ -68,12 +62,11 @@ def setup():
         a.set_mode(0)
         a.set_state(0)
         a.set_servo_angle(angle=[0.0, 0.0, 0.0, 1.57, 0.0, 0, 0.0], wait=False, speed=0.4, acceleration=0.25,
-                          is_radian=True)
+                        is_radian=True)
 
 
 if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((SOCKET_HOST, SOCKET_PORT))
     s.listen()
     s.settimeout(None)
