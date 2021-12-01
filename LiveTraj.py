@@ -13,8 +13,7 @@ def setup():
         a.clean_error()
         a.set_mode(0)
         a.set_state(0)
-        a.set_servo_angle(angle=[0.0, 0.0, 0.0, 1.57, 0.0, 0, 0.0], wait=False, speed=0.4, acceleration=0.25,
-                          is_radian=True)
+        a.set_servo_angle(angle=[0.0, 0.0, 0.0, 1.57, 0.0, 0, 0.0], wait=False, speed=0.4, acceleration=0.25, is_radian=True)
 
 
 # Press the green button in the gutter to run the script.
