@@ -70,22 +70,22 @@ class MyMidiHandler():
         # check for major triad
         if (interval1 == 4 and interval2 == 3) or (interval1 == 3 and interval2 == 5) or (
                 interval1 == 5 and interval2 == 4):
-            print("major")
+            # print("major")
             return "major"
         # check for minor triad
         elif (interval1 == 3 and interval2 == 4) or (interval1 == 4 and interval2 == 5) or (
                 interval1 == 5 and interval2 == 3):
-            print("minor")
+            # print("minor")
             return "minor"
         # check for augmented triad
         elif (interval1 == 4 and interval2 == 4) or (interval1 == 4 and interval2 == 4) or (
                 interval1 == 4 and interval2 == 4):
-            print("augmented")
+            # print("augmented")
             return "augmented"
         # check for diminished triad
         elif (interval1 == 3 and interval2 == 3) or (interval1 == 3 and interval2 == 6) or (
                 interval1 == 6 and interval2 == 3):
-            print("diminished")
+            # print("diminished")
             return "diminished"
 
         else:
@@ -108,11 +108,18 @@ class MyMidiHandler():
                         status, note, velocity = message
                         # note = self.number_to_note(note)
                         # print(note[0])
-                        if deltatime <= 0.5 and q.qsize() > 2:
+                        if q.qsize() > 2:
+                            # print(deltatime)
+                            # if deltatime <= 1:
                             chord = self.determineTriads(q)
                             q = Queue()
                             s.sendall(chord.encode('UTF-8'))
-                        q.put(note)
+                            # else:
+                            #     q = Queue()
+                        if deltatime <= 0.5:
+                            q.put(note)
+                        else:
+                            q = Queue()
 
         except KeyboardInterrupt:
             s.close()
