@@ -1,15 +1,18 @@
-from rtpmidi import RtpMidi
+# from rtpmidi import RtpMidi
 from pymidi import server
 import os
 import sys
 import time
-import csv
-import pdb
 from queue import Queue
 from threading import Thread
 import time
 import numpy as np
 from numpy import interp
+import socket
+
+# DEFINE Socket
+SOCKET_HOST = '0.0.0.0'  # Standard loopback interface address (localhost)
+SOCKET_PORT = 58301        # Port to listen on (non-privileged ports are > 1023)
 
 def setup():
     for a in arms:
@@ -158,7 +161,7 @@ def pitchContour(in_q4):
 
 def playRobot(que, arm):
     IP = [0, 0, 0, 90, 0, 0, 0]
-    tf = 3
+    tf = 6
 
     # t0 = 0
     t = [0 for i in range(0, 7)]
@@ -176,151 +179,192 @@ def playRobot(que, arm):
 
     while True:
         q = que.get()
+        print(q)
 
         # print("\nDequeued")
-        goal = q
-        q_i = p
-        # q_i = j_angles
-        q_dot_i = [0, 0, 0, 0, 0, 0, 0]
-        q_dotdot_i = [0, 0, 0, 0, 0, 0, 0]
-        q_f = goal
-        j = 0
+        # goal = q
+        # q_i = p
+        # # q_i = j_angles
+        # q_dot_i = [0, 0, 0, 0, 0, 0, 0]
+        # q_dotdot_i = [0, 0, 0, 0, 0, 0, 0]
+        # q_f = goal
+        # j = 0
 
-        while j <= len(t_array):
-            start_time = time.time()
+        # while j <= len(t_array):
+        #     start_time = time.time()
+        #
+        #     if que.empty() == False:
+        #         goal = q.get()
+        #         q_i = p
+        #         q_dot_i = v
+        #         q_dotdot_i = [0 for i in range(0, 7)]
+        #         q_f = goal
+        #         j = 0
+        #         # IF YOU WANT TO ADD SPEED CHANGES THEN SWAP THE ABOVE LINES WITH THE BELOW LINES
+        #         # # q should input an array of [*absolute* position of joint, time(in seconds) to reach there]
+        #         # q_f = goal[0]
+        #         # tf = goal[1]
+        #         # t_array = np.arange(0, tf, 0.006)
+        #         print("switch")
+        #     if j == len(t_array):
+        #         t = tf
+        #     else:
+        #         t = t_array[j]
+        #
+        #     a0 = q_i
+        #     a1 = q_dot_i
+        #     a2 = []
+        #     a3 = []
+        #     a4 = []
+        #     a5 = []
+        #
+        #     for i in range(0, 7):
+        #         a2.append(0.5 * q_dotdot_i[i])
+        #         a3.append(1.0 / (2.0 * tf ** 3.0) * (
+        #                     20.0 * (q_f[i] - q_i[i]) - (8.0 * q_dot_f[i] + 12.0 * q_dot_i[i]) * tf - (
+        #                         3.0 * q_dotdot_f[i] - q_dotdot_i[i]) * tf ** 2.0))
+        #         a4.append(1.0 / (2.0 * tf ** 4.0) * (
+        #                     30.0 * (q_i[i] - q_f[i]) + (14.0 * q_dot_f[i] + 16.0 * q_dot_i[i]) * tf + (
+        #                         3.0 * q_dotdot_f[i] - 2.0 * q_dotdot_i[i]) * tf ** 2.0))
+        #         a5.append(1.0 / (2.0 * tf ** 5.0) * (
+        #                     12.0 * (q_f[i] - q_i[i]) - (6.0 * q_dot_f[i] + 6.0 * q_dot_i[i]) * tf - (
+        #                         q_dotdot_f[i] - q_dotdot_i[i]) * tf ** 2.0))
+        #
+        #         p[i] = (a0[i] + a1[i] * t + a2[i] * t ** 2 + a3[i] * t ** 3 + a4[i] * t ** 4 + a5[i] * t ** 5)
+        #         v[i] = (a1[i] + 2 * a2[i] * t + 3 * a3[i] * t ** 2 + 4 * a4[i] * t ** 3 + 5 * a5[i] * t ** 4)
+        #         a[i] = (2 * a2[i] + 6 * a3[i] * t + 12 * a4[i] * t ** 2 + 20 * a5[i] * t ** 3)
+        #
+        #     j_angles = p
+        #     # arm.set_servo_angle_j(angles=p, is_radian=False)
+        #     print(f"{p} {arm}")
+        #
+        #     tts = time.time() - start_time
+        #     sleep = 0.006 - tts
+        #
+        #     if tts > 0.006:
+        #         sleep = 0
+        #
+        #     time.sleep(sleep)
+        #     j += 1
+        #     # if t == 1:
+        #     # print(t, p, v, a)
+        #
+        print(f"\nFinished {arm}")
 
-            if que.empty() == False:
-                goal = q.get()
-                q_i = p
-                q_dot_i = v
-                q_dotdot_i = [0 for i in range(0, 7)]
-                q_f = goal
-                j = 0
-                # IF YOU WANT TO ADD SPEED CHANGES THEN SWAP THE ABOVE LINES WITH THE BELOW LINES
-                # # q should input an array of [*absolute* position of joint, time(in seconds) to reach there]
-                # q_f = goal[0]
-                # tf = goal[1]
-                # t_array = np.arange(0, tf, 0.006)
-                print("switch")
-            if j == len(t_array):
-                t = tf
-            else:
-                t = t_array[j]
-
-            a0 = q_i
-            a1 = q_dot_i
-            a2 = []
-            a3 = []
-            a4 = []
-            a5 = []
-
-            for i in range(0, 7):
-                a2.append(0.5 * q_dotdot_i[i])
-                a3.append(1.0 / (2.0 * tf ** 3.0) * (
-                            20.0 * (q_f[i] - q_i[i]) - (8.0 * q_dot_f[i] + 12.0 * q_dot_i[i]) * tf - (
-                                3.0 * q_dotdot_f[i] - q_dotdot_i[i]) * tf ** 2.0))
-                a4.append(1.0 / (2.0 * tf ** 4.0) * (
-                            30.0 * (q_i[i] - q_f[i]) + (14.0 * q_dot_f[i] + 16.0 * q_dot_i[i]) * tf + (
-                                3.0 * q_dotdot_f[i] - 2.0 * q_dotdot_i[i]) * tf ** 2.0))
-                a5.append(1.0 / (2.0 * tf ** 5.0) * (
-                            12.0 * (q_f[i] - q_i[i]) - (6.0 * q_dot_f[i] + 6.0 * q_dot_i[i]) * tf - (
-                                q_dotdot_f[i] - q_dotdot_i[i]) * tf ** 2.0))
-
-                p[i] = (a0[i] + a1[i] * t + a2[i] * t ** 2 + a3[i] * t ** 3 + a4[i] * t ** 4 + a5[i] * t ** 5)
-                v[i] = (a1[i] + 2 * a2[i] * t + 3 * a3[i] * t ** 2 + 4 * a4[i] * t ** 3 + 5 * a5[i] * t ** 4)
-                a[i] = (2 * a2[i] + 6 * a3[i] * t + 12 * a4[i] * t ** 2 + 20 * a5[i] * t ** 3)
-
-            j_angles = p
-            arm.set_servo_angle_j(angles=p, is_radian=False)
-            # print(f"{p} {arm}")
-
-            tts = time.time() - start_time
-            sleep = 0.006 - tts
-
-            if tts > 0.006:
-                sleep = 0
-
-            time.sleep(sleep)
-            j += 1
-            # if t == 1:
-            # print(t, p, v, a)
-
-        # print(f"\nFinished {arm}")
-
-def changeDir(lst):
-    while True:
+def changeDir(lst, pos):
+    # while True:
         # pos = list(map(int, input("\nEnter the positions for joints 1-7 : ").strip().split()))[:7]
-        time.sleep(5)
-        pos = [0, 0, 0, 90, 0, 90, 0]
-        for que in lst:
-            que.put(pos)
-        time.sleep(5)
-        pos = [0, 0, 0, 90, 10, 0, 0]
-        for que in lst:
-            que.put(pos)
+        # time.sleep(5)
+        # pos = [0, 0, 0, 90, 0, 90, 0]
+    for que in lst:
+        que.put(pos)
+        # time.sleep(5)
+        # pos = [0, 0, 0, 90, 10, 0, 0]
+        # for que in lst:
+        #     que.put(pos)
 
 if __name__ == "__main__":
-    ROBOT = "xArms"
-    PORT = 5004
+    # INITIALIZE Socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((SOCKET_HOST, SOCKET_PORT))
+    s.listen()
+    s.settimeout(None)
+    conn, addr = s.accept()
+    s.settimeout(None)
 
-    sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
-    from xarm.wrapper import XArmAPI
-
-    arm1 = XArmAPI('192.168.1.208')
-    arm2 = XArmAPI('192.168.1.244')
-    arm3 = XArmAPI('192.168.1.203')
-    arm4 = XArmAPI('192.168.1.236')
-    arm5 = XArmAPI('192.168.1.226')
-    arm6 = XArmAPI('192.168.1.242')
+    # INITIALIZE Arms
+    # ROBOT = "xArms"
+    # PORT = 5004
+    #
+    # sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
+    # from xarm.wrapper import XArmAPI
+    #
+    # arm1 = XArmAPI('192.168.1.208')
+    # arm2 = XArmAPI('192.168.1.244')
+    # arm3 = XArmAPI('192.168.1.203')
+    # arm4 = XArmAPI('192.168.1.236')
+    # arm5 = XArmAPI('192.168.1.226')
+    # arm6 = XArmAPI('192.168.1.242')
     # arm7 = XArmAPI('192.168.1.215')
     # arm8 = XArmAPI('192.168.1.234')
     # arm9 = XArmAPI('192.168.1.237')
     # arm10 = XArmAPI('192.168.1.204')
 
     # arms = [arm1, arm2, arm3, arm4, arm5, arm6, arm7, arm8, arm9, arm10]
-    arms = [arm1, arm2, arm3, arm4, arm5, arm6]
+    # arms = [arm1, arm2, arm3, arm4, arm5, arm6]
     # theback = [arm5, arm7, arm8, arm9, arm10]
 
-    totalArms = len(arms)
+    # totalArms = len(arms)
 
-    setup()
-    repeat = input("do we need to repeat? [y/n]")
-    if repeat == 'y':
-        setup()
+    # setup()
+    # repeat = input("do we need to repeat? [y/n]")
+    # if repeat == 'y':
+    #     setup()
     # for a in arms:
     #     a.set_mode(1)
     #     a.set_state(0)
 
-    arm2.set_mode(1)
-    arm2.set_state(0)
-    arm3.set_mode(1)
-    arm3.set_state(0)
+    # arm2.set_mode(1)
+    # arm2.set_state(0)
+    # arm3.set_mode(1)
+    # arm3.set_state(0)
 
     arm2_q = Queue()
     arm3_q = Queue()
     que_pos = [arm2_q, arm3_q]
 
     # Start Arms
-    t1 = Thread(target=playRobot, args=(arm2_q, arm2))
-    t2 = Thread(target=playRobot, args=(arm3_q, arm3))
+    t1 = Thread(target=playRobot, args=(arm2_q, 'arm2'))
+    t2 = Thread(target=playRobot, args=(arm3_q, 'arm3'))
     # Queue Direction
-    p = Thread(target=changeDir, args=(que_pos,))
-    p.start()
+    # p = Thread(target=changeDir, args=(que_pos,))
+    # p.start()
 
     # Create the shared queue and launch both threads
     q2 = Queue()
     q3 = Queue()
     q4 = Queue()
-    rtp_midi = RtpMidi(ROBOT, MyHandler(), PORT)
+    # rtp_midi = RtpMidi(ROBOT, MyHandler(), PORT)
     # t3 = Thread(target=onset, args=(q2,))
     # t3.start()
     # t4 = Thread(target=tempo, args=(q3,))
     # t4.start()
     t5 = Thread(target=pitchContour, args=(q4,))
-    t5.start()
+    # t5.start()
 
     # Play Robot
     t1.start()
-    t2.start()
+    # t2.start()
 
-    rtp_midi.run()
+    # rtp_midi.run()
+
+    try:
+        with conn:
+            s.settimeout(None)
+            print('Connected by', addr)
+            while True:
+                chord = conn.recv(1024).decode()
+                if chord == "E-M":
+                    print("E-M\n")
+                    changeDir(que_pos, [-140, -12, 3, 125, 3, 70, -30])
+                if chord == "C#-m":
+                    print("C#-m\n")
+                    changeDir(que_pos, [105, 43, -61, 125, -76, 70, 25])
+                if chord == "A-M":
+                    print("A-M\n")
+                    changeDir(que_pos, [-35, -115, -175, 190, -7.5, -12, 25])
+                if chord == "B-M":
+                    print("B-M\n")
+                    changeDir(que_pos, [-60, 75, 255, 151, -17, 30, 25])
+
+    except socket.error as socketerror:
+            s.close()  # Remember to close sockets after use!
+            print("Error: ", socketerror)
+
+    except KeyboardInterrupt:
+        s.close()  # Remember to close sockets after use!
+        print('Keyboard interrupt...')
+
+    finally:
+        s.close()  # Remember to close sockets after use!
+        print("Exiting...")
