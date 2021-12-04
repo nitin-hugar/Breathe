@@ -17,7 +17,7 @@ from rtmidi.midiconstants import NOTE_ON
 from rtmidi.midiutil import open_midiinput
 
 HOST = '192.168.2.2'  # The server's hostname or IP address
-PORT = 58304       # The port used by the server
+PORT = 58306       # The port used by the server
 
 log = logging.getLogger('midiin_poll')
 logging.basicConfig(level=logging.DEBUG)
@@ -134,7 +134,7 @@ def send_midi_sound(channel, note, velocity):
     available_ports = midiout.get_ports()
     if available_ports:
         # midiout.open_port(0)
-        midiout.open_port(1)
+        midiout.open_port(2)
         # midiout.open_port(2)
         # midiout.open_port(3)
 
@@ -149,6 +149,8 @@ def send_midi_sound(channel, note, velocity):
 def midiPlayBack(notes):
     for note in notes:
         pitch = note[2]
+        if pitch > 83:
+            pitch = 83
         print(pitch)
         duration = note[1]
         if duration > 0.4:
@@ -257,10 +259,10 @@ class MyMidiHandler():
             return "none"
 
     def on_midi_command(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(None)
-        s.connect((HOST, PORT))
-        s.settimeout(None)
+        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # s.settimeout(None)
+        # s.connect((HOST, PORT))
+        # s.settimeout(None)
 
         q = Queue()
 
@@ -273,19 +275,23 @@ class MyMidiHandler():
                         status, note, velocity = message
                         # note = self.number_to_note(note)
                         # print(note[0])
-                        if q.qsize() > 2:
-                            # print(deltatime)
-                            # if deltatime <= 1:
-                            # chord = self.determineTriads(q)
-                            chord = self.determineTriadsPerformance(q)
-                            q = Queue()
-                            s.sendall(chord.encode('UTF-8'))
-                            # else:
-                            #     q = Queue()
-                        if deltatime <= 0.5:
+                        # if deltatime <= 0.5:
+                        #     q.put(note)
+                        # else:
+                        #     q = Queue()
+                        # if deltatime <= 1:
+                        if note >= 57 and note <= 71:
                             q.put(note)
-                        else:
-                            q = Queue()
+                            print(note)
+                    if q.qsize() > 2:
+                        # print(deltatime)
+                        # if deltatime <= 1:
+                        # chord = self.determineTriads(q)
+                        chord = self.determineTriadsPerformance(q)
+                        # q = Queue()
+                        # s.sendall(chord.encode('UTF-8'))
+                        # else:
+                        q = Queue()
 
         except KeyboardInterrupt:
             s.close()
@@ -302,57 +308,57 @@ if __name__ == "__main__":
     t = Thread(target=midi_keyboard.on_midi_command, args=())
     t.start()
 
-    input("Hit any key to play")
-
-    silence_flag = False
-    pyaudio_format = pyaudio.paFloat32
-    n_channels = 1
-    samplerate = 44100
-    silenceThresholdindB = -40
-    win_s = 1024  # fft size
+    # input("Hit any key to play")
+    #
+    # silence_flag = False
+    # pyaudio_format = pyaudio.paFloat32
+    # n_channels = 1
+    # samplerate = 44100
+    # silenceThresholdindB = -40
+    # win_s = 1024  # fft size
     hop_s = 512  # hop size
-    fs = 44100
-
-    p = pyaudio.PyAudio()
-
-    # open stream
-    stream = p.open(format=pyaudio_format,
-                    channels=n_channels,
-                    rate=samplerate,
-                    input=True,
-                    frames_per_buffer=hop_s)
-
-    print("*** starting recording")
-    audio_block = np.array([], dtype=np.float32)
-    section_pitches = np.array([])
-    section_onsets = np.array([])
-    record_time = 10
-
-    while True:
-        try:
-            print("Record")
-            # record a short phrase
-            for i in range(0, int(samplerate / hop_s * record_time)):
-                audiobuffer = stream.read(hop_s, exception_on_overflow=False)
-                signal = np.frombuffer(audiobuffer, dtype=np.float32)
-                audio_block = np.append(audio_block, signal)
-
-            # channel1 = data_array[1::n_channels]
-
-            print("Playback")
-            synthPlayBack(audio_block, hop_s, samplerate)
-            #         midiPlayBack(notes)
-            audio_block = np.array([])
-
-
-
-        except KeyboardInterrupt:
-            print("***Ending Stream")
-            break
-
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+    # fs = 44100
+    #
+    # p = pyaudio.PyAudio()
+    #
+    # # open stream
+    # stream = p.open(format=pyaudio_format,
+    #                 channels=n_channels,
+    #                 rate=samplerate,
+    #                 input=True,
+    #                 frames_per_buffer=hop_s)
+    #
+    # print("*** starting recording")
+    # audio_block = np.array([], dtype=np.float32)
+    # section_pitches = np.array([])
+    # section_onsets = np.array([])
+    # record_time = 10
+    #
+    # while True:
+    #     try:
+    #         print("Record")
+    #         # record a short phrase
+    #         for i in range(0, int(samplerate / hop_s * record_time)):
+    #             audiobuffer = stream.read(hop_s, exception_on_overflow=False)
+    #             signal = np.frombuffer(audiobuffer, dtype=np.float32)
+    #             audio_block = np.append(audio_block, signal)
+    #
+    #         # channel1 = data_array[1::n_channels]
+    #
+    #         print("Playback")
+    #         synthPlayBack(audio_block, hop_s, samplerate)
+    #         #         midiPlayBack(notes)
+    #         audio_block = np.array([])
+    #
+    #
+    #
+    #     except KeyboardInterrupt:
+    #         print("***Ending Stream")
+    #         break
+    #
+    # stream.stop_stream()
+    # stream.close()
+    # p.terminate()
 
     # midiout = rtmidi.MidiOut()
     # available_ports = midiout.get_ports()
