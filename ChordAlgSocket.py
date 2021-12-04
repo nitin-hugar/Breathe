@@ -15,7 +15,7 @@ from rtmidi.midiconstants import NOTE_ON
 from rtmidi.midiutil import open_midiinput
 
 HOST = '0.0.0.0'  # The server's hostname or IP address
-PORT = 58299       # The port used by the server
+PORT = 58301       # The port used by the server
 
 log = logging.getLogger('midiin_poll')
 logging.basicConfig(level=logging.DEBUG)
@@ -91,6 +91,33 @@ class MyMidiHandler():
         else:
             return "none"
 
+    def determineTriadsPerformance(self, q):
+        pitch1 = q.get()
+        pitch2 = q.get()
+        pitch3 = q.get()
+
+        pitches = [pitch1, pitch2, pitch3]
+        pitches_ascending = sorted(pitches)
+
+        # E Major
+        if (pitches_ascending[0] == 64 and pitches_ascending[1] == 68 and pitches_ascending[2] == 71):
+            print("E\n")
+            return "E-M"
+        # c sharp minor
+        elif (pitches_ascending[0] == 61 and pitches_ascending[1] == 64 and pitches_ascending[2] == 68):
+            print("C\n")
+            return "C#-m"
+        # A Major
+        elif (pitches_ascending[0] == 57 and pitches_ascending[1] == 61 and pitches_ascending[2] == 64):
+            print("A\n")
+            return "A-M"
+        # B Major
+        elif (pitches_ascending[0] == 59 and pitches_ascending[1] == 63 and pitches_ascending[2] == 66):
+            print("B\n")
+            return "B-M"
+        else:
+            return "none"
+
     def on_midi_command(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(None)
@@ -111,7 +138,8 @@ class MyMidiHandler():
                         if q.qsize() > 2:
                             # print(deltatime)
                             # if deltatime <= 1:
-                            chord = self.determineTriads(q)
+                            # chord = self.determineTriads(q)
+                            chord = self.determineTriadsPerformance(q)
                             q = Queue()
                             s.sendall(chord.encode('UTF-8'))
                             # else:
