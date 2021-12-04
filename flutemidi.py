@@ -16,8 +16,8 @@ from queue import Queue
 from rtmidi.midiconstants import NOTE_ON
 from rtmidi.midiutil import open_midiinput
 
-HOST = '0.0.0.0'  # The server's hostname or IP address
-PORT = 58301       # The port used by the server
+HOST = '192.168.2.2'  # The server's hostname or IP address
+PORT = 58304       # The port used by the server
 
 log = logging.getLogger('midiin_poll')
 logging.basicConfig(level=logging.DEBUG)
@@ -257,51 +257,52 @@ class MyMidiHandler():
             return "none"
 
     def on_midi_command(self):
-        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # s.settimeout(None)
-        # s.connect((HOST, PORT))
-        # s.settimeout(None)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(None)
+        s.connect((HOST, PORT))
+        s.settimeout(None)
 
         q = Queue()
 
-        # try:
-        while True:
-            event = self.midiin.get_message()
-            if event:
-                message, deltatime = event
-                if message[0] & 0xF0 == NOTE_ON:
-                    status, note, velocity = message
-                    # note = self.number_to_note(note)
-                    # print(note[0])
-                    if q.qsize() > 2:
-                        # print(deltatime)
-                        # if deltatime <= 1:
-                        # chord = self.determineTriads(q)
-                        chord = self.determineTriadsPerformance(q)
-                        q = Queue()
-                        # s.sendall(chord.encode('UTF-8'))
-                        # else:
-                        #     q = Queue()
-                    if deltatime <= 0.5:
-                        q.put(note)
-                    else:
-                        q = Queue()
+        try:
+            while True:
+                event = self.midiin.get_message()
+                if event:
+                    message, deltatime = event
+                    if message[0] & 0xF0 == NOTE_ON:
+                        status, note, velocity = message
+                        # note = self.number_to_note(note)
+                        # print(note[0])
+                        if q.qsize() > 2:
+                            # print(deltatime)
+                            # if deltatime <= 1:
+                            # chord = self.determineTriads(q)
+                            chord = self.determineTriadsPerformance(q)
+                            q = Queue()
+                            s.sendall(chord.encode('UTF-8'))
+                            # else:
+                            #     q = Queue()
+                        if deltatime <= 0.5:
+                            q.put(note)
+                        else:
+                            q = Queue()
 
-        # except KeyboardInterrupt:
-        #     # s.close()
-        #     print('Exiting')
-        #
-        # finally:
-        #     # s.close()
-        #     print("Exit.")
-        #     self.midiin.close_port()
-        #     del self.midiin
+        except KeyboardInterrupt:
+            s.close()
+            print('Exiting')
+
+        finally:
+            s.close()
+            print("Exit.")
+            self.midiin.close_port()
+            del self.midiin
 
 if __name__ == "__main__":
     midi_keyboard = MyMidiHandler()
     t = Thread(target=midi_keyboard.on_midi_command, args=())
     t.start()
 
+    input("Hit any key to play")
 
     silence_flag = False
     pyaudio_format = pyaudio.paFloat32
