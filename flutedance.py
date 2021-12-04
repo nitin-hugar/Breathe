@@ -193,6 +193,11 @@ def playRobot(que, arm):
         while j < len(t_array):
             start_time = time.time()
 
+            if abs(p[0] - q_f[0]) < 1.0 and abs(p[1] - q_f[1]) < 1.0 and abs(p[2] - q_f[2]) < 1.0 and abs(
+                    p[3] - q_f[3]) < 1.0 and abs(p[4] - q_f[4]) < 1.0 and abs(p[5] - q_f[5]) < 1.0 and abs(
+                    p[6] - q_f[6]) < 1.0:
+                break
+
             # if que.empty() == False:
             #     q = que.get
             #     goal = q
