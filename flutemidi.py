@@ -199,7 +199,7 @@ class MyMidiHandler():
                         # if deltatime <= 1:
                         if note >= 57 and note <= 71:
                             q.put(note)
-                            print(note)
+                            # print(note)
                     if q.qsize() > 2:
                         # print(deltatime)
                         # if deltatime <= 1:
@@ -462,21 +462,16 @@ if __name__ == "__main__":
     t_midi = Thread(target=midi_keyboard.on_midi_command, args=())
     t_midi.start()
 
-    t_flute_1 = Thread(target=playFlute, args=(2,))
-    t_flute_2 = Thread(target=playFlute, args=(10,))
+    t_flute = Thread(target=playFlute, args=(10,))
     t_drums = Thread(target=playDrums, args=())
 
     input("Press a key to play flute:\n")
-    t_flute_1.start()
+    t_flute.start()
 
-    input("Press a key to play flute:\n")
-    stop_flute = True
-    t_flute_1.join()
-    t_flute_2.start()
 
     input("Press a key to play drums:\n")
     stop_flute = True
-    t_flute_2.join()
+    t_flute.join()
     t_drums.start()
 
     # midiout = rtmidi.MidiOut()
