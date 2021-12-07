@@ -183,9 +183,8 @@ def playRobot(que, arm):
 
     while True:
         q = que.get()
-
-        print(q)
-        print("\nDequeued")
+        # print(q)
+        # print("\nDequeued")
 
         goal = q
         q_i = p
@@ -260,7 +259,7 @@ def playRobot(que, arm):
             # if t == 1:
             # print(t, p, v, a)
 
-        print(f"\nFinished {arm}")
+        # print(f"\nFinished {arm}")
 
 
 def changeDir(q, pos):
