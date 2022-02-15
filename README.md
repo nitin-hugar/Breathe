@@ -1,6 +1,6 @@
-# Vrindavan
+# Breathe
 
-This is a repository for 'Vrindavan' which is part of Georgia Tech Center for Music Technology's 'Forest' project
+This is a repository for 'Breathe' which is part of Georgia Tech Center for Music Technology's 'Forest' project
 
 ## Video of performance
 
